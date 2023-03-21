@@ -1,0 +1,135 @@
+#include <stdio.h>
+#include <sys/mman.h>
+#define _GNU_SOURCE 
+
+typedef struct fun_arg
+{
+    void (*f)(void *); //function pointer
+    void *arg; // arguements passed to thread
+    void *stack; // stack for each thread
+} fun_arg;
+
+
+typedef unsigned long thread; //thread object
+//thread node
+typedef struct thread_node
+{
+    unsigned long int tid;
+    struct thread_node *next;
+    fun_arg *fa;
+} thread_node;
+
+typedef struct thread_attributes
+{
+    void *stack;
+    size_t stack_size;
+} thread_attributes;
+
+
+
+//single linked list for thread controlling
+typedef struct single_LL
+{
+    thread_node *head;
+    thread_node *tail;
+} single_LL;
+
+
+int initialize_sll(single_LL *t)
+{
+    if (!t)
+        return -1;
+    t->head = t->tail = NULL;
+    return 0;
+}
+
+thread_node *get_particular_tid_node(single_LL *x, unsigned long int tid)
+{
+    thread_node *t = x->head;
+    while (t != NULL)
+    {
+        if (t->tid == tid)
+        {
+            return t;
+        }
+        t = t->next;
+    }
+    return NULL;
+}
+
+
+
+// PROT_READ
+//         Pages may be read.
+
+// PROT_WRITE
+//         Pages may be written.
+
+static void *stack_allocation(size_t stk_size,size_t protect_area)
+{
+    void *stack = NULL;
+    // For a memory region to be used as a stack, the MAP_STACK
+    // flag has to be passed to mmap; otherwise, upon syscalls and pagefaults, if the stack-pointer 
+    // register doesn’t point to such a page, the program gets killed.
+    stack = mmap(NULL, stk_size , PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_STACK, -1, 0);
+    if (stack == MAP_FAILED)
+    {
+        perror("Failed stack allocation");
+        return NULL;
+    }
+    if (mprotect(stack, protect_area, PROT_NONE))
+    {
+        munmap(stack, stk_size + protect_area);
+        return NULL;
+    }
+    return stack;
+}
+
+
+thread_node* insert_sll(single_LL *x,unsigned long int tid)
+{
+    //allocate the memory and 
+    //change the tail
+}
+
+int delete_sll(single_LL *x,unsigned long int tid)
+{
+    thread_node *tmp = x->head;
+    if (tmp == NULL)
+    {
+        return -1;
+    }
+    //locate the node with passed tid and free the memory
+}
+
+int create_thread(thread *t, void *attribute, void *routine, void *arg)
+{
+    //if first then initialize singly ll
+    //insert the node and pass function arguements
+    //check the attributes and and clone a thread
+}
+
+//function sends the signal sig to thread
+
+int kill_thread(pid_t tid, int signum)
+{
+
+}
+
+// The exit_thread() function terminates the calling thread and returns a
+//        value via retval that (if the thread is joinable) is available  to  an‐
+//        other thread in the same process that calls pthread_join
+void exit_thread(void *retval)
+{
+
+}
+
+//wait for a specific thread to terminate
+//t TID of the thread to wait for
+
+int join_thread(thread t, void **retval)
+{
+    
+}
+
+
